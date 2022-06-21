@@ -1,18 +1,21 @@
 function assertEquals(expect, actual) {
-  const actualType = checkTypes(expect, actual);
+  const typeOfElements = compareTypes(expect, actual);
 
-  if (actualType === "array")
-    return areArraysEqual(expect, actual);
+  if (typeOfElements === "array") {
+    compareArraysLength(expect, actual);
+    compareArraysItems(expect, actual);
+    return;
+  }
+
+  if (expect !== actual) {
+    const isTypeString = typeOfElements === "string";
+    throwStandardError(expect, actual, isTypeString);
+  }
 }
 
-function checkTypes(expect, actual) {
-  const typeOf = (element) =>
-    Array.isArray(element)
-      ? "array"
-      : typeof element;
-
-  const expectType = typeOf(expect);
-  const actualType = typeOf(actual);
+function compareTypes(expect, actual) {
+  const expectType = getTypeOf(expect);
+  const actualType = getTypeOf(actual);
 
   if (expectType !== actualType)
     throw new TypeError(
@@ -22,21 +25,35 @@ function checkTypes(expect, actual) {
   return actualType;
 }
 
-function areArraysEqual(expect, actual) {
+function compareArraysLength(expect, actual) {
   if (expect.length !== actual.length)
     throw new Error(
       `Expected array length ${expect.length} but found ${actual.length}`
     );
 }
 
-function throwStandardError() {
-  throw new Error(
-    `Expected ${expect} but found ${actual}`
-  );
+function compareArraysItems(expect, actual) {
+  expect.forEach((expectItem, index) => {
+    const actualItem = actual[index];
+    assertEquals(expectItem, actualItem);
+  });
+}
+
+function throwStandardError(expect, actual, isString) {
+  const errorMessage = isString
+    ? `Expected "${expect}" but found "${actual}"`
+    : `Expected ${expect} but found ${actual}`;
+  throw new Error(errorMessage);
+}
+
+function getTypeOf(element) {
+  return Array.isArray(element) ? "array" : typeof element;
 }
 
 module.exports = {
   assertEquals,
-  checkTypes,
-  areArraysEqual,
+  compareTypes,
+  compareArraysLength,
+  compareArraysItems,
+  getTypeOf,
 };
