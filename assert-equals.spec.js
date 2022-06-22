@@ -19,28 +19,16 @@ describe("assertEquals", () => {
   });
 
   describe("when items are not equal, throw an error", () => {
-    test("different types", () =>
-      expect(() => assertEquals(1, "2")).toThrow(
-        "Expected type number but found type string"
-      ));
-
-    test("different numbers", () =>
-      expect(() => assertEquals(1, 2)).toThrow("Expected 1 but found 2"));
-
-    test("different strings", () =>
-      expect(() => assertEquals("abcef", "abc")).toThrow(
-        'Expected "abcef" but found "abc"'
-      ));
-
-    test("different array lengths", () =>
-      expect(() => assertEquals(["a", "b"], ["a", "b", "c"])).toThrow(
-        "Expected array length 2 but found 3"
-      ));
-
-    test("different array items", () =>
-      expect(() => assertEquals(["a", "b"], ["a", "d"])).toThrow(
-        'Expected "b" but found "d"'
-      ));
+    test.each`
+      a             | b                  | whatIsTested       | errorMessage
+      ${1}          | ${"2"}             | ${"types"}         | ${"Expected type number but found type string"}
+      ${1}          | ${2}               | ${"numbers"}       | ${"Expected 1 but found 2"}
+      ${"abcef"}    | ${"abc"}           | ${"strings"}       | ${'Expected "abcef" but found "abc"'}
+      ${["a", "b"]} | ${["a", "b", "c"]} | ${"array lengths"} | ${"Expected array length 2 but found 3"}
+      ${["a", "b"]} | ${["a", "d"]}      | ${"array items"}   | ${'Expected "b" but found "d"'}
+    `("different $whatIsTested - $a compared to $b", ({ a, b, errorMessage }) =>
+      expect(() => assertEquals(a, b)).toThrow(errorMessage)
+    );
   });
 });
 
